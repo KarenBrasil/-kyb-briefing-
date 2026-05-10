@@ -436,9 +436,6 @@ function ClientView({ clientName, onLogout, t, isDark, toggleDark }) {
     try {
       const ts = Date.now();
       await saveSnapshot(clientId, clientName, {...answers}, ts);
-      await upsertClient(clientId, clientName, {});
-      setAnswers({});
-      setOpen({});
       const snaps = await listSnapshots(clientId);
       setSnapList(snaps || []);
       setSaving(false);
