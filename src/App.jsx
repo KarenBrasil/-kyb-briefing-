@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { getClient, upsertClient, listClients, saveSnapshot, listSnapshots, deleteSnapshot, getMeta, saveMeta } from "./lib/db";
 
 const THEMES = {
@@ -427,7 +427,7 @@ function ClientView({ clientName, onLogout, t, isDark, toggleDark }) {
 
   const setAns = useCallback((id,v) => setAnswers(p=>({...p,[id]:v})), []);
   const toggleSec = id => setOpen(p=>({...p,[id]:!p[id]}));
-  const { total, done, pct } = countFilled(answers);
+  const { total, done, pct } = useMemo(() => countFilled(answers), [answers]);
 
   const handleSave = async () => {
     const filledCount = Object.values(answers).filter(v=>v&&v.trim()).length;
@@ -663,7 +663,7 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
     }
   };
 
-  const { total, done, pct } = countFilled(answers);
+  const { total, done, pct } = useMemo(() => countFilled(answers), [answers]);
   const checkDone = CHECKLIST.filter(c=>checklist[c.id]).length;
   const toggleCheck = id => setChecklist(p=>({...p,[id]:!p[id]}));
 
