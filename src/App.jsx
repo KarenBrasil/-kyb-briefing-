@@ -205,8 +205,8 @@ function Pill({ children, color }) {
 function Btn({ children, onClick, variant="primary", icon, size="md", disabled, full, t }) {
   const sz = {sm:{p:"6px 13px",fs:11}, md:{p:"9px 18px",fs:13}, lg:{p:"12px 26px",fs:14}}[size];
   const v = {
-    primary: {bg:t.rose,         color:"#fff",        border:"none"},
-    gold:    {bg:t.gold,         color:"#fff",        border:"none"},
+    primary: {bg:t.rose,         color:t.bg,          border:"none"},
+    gold:    {bg:t.gold,         color:t.bg,          border:"none"},
     ghost:   {bg:"transparent",  color:t.textMuted,   border:`1px solid ${t.border}`},
     nude:    {bg:t.nudeDim,      color:t.textMid,     border:`1px solid ${t.borderMid}`},
     green:   {bg:t.greenDim,     color:t.green,       border:`1px solid ${t.green}40`},
