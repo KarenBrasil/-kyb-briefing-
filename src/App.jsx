@@ -1051,7 +1051,7 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
 
       </main>
 
-      {viewSnap && <SummaryModal snap={viewSnap} t={t} onClose={()=>setViewSnap(null)} isAdmin/>}
+      {viewSnap && <SummaryModal snap={viewSnap} t={t} onClose={()=>setViewSnap(null)} isAdmin={isAdmin}/>}
     </div>
   );
 }
