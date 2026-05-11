@@ -912,7 +912,7 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
               <h2 className="pf" style={{fontSize:22,color:t.text,marginBottom:4}}>✨ Gerador de Roteiros</h2>
               <p style={{color:t.textMuted,fontSize:12,marginBottom:18}}>Gere até 10 roteiros automáticos para seus vídeos</p>
 
-              <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr)),marginBottom:20}}>
+              <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",marginBottom:20}}>
                 <div>
                   <label style={{display:"block",fontSize:11,fontWeight:600,color:t.textMid,marginBottom:6}}>Nome do Produto</label>
                   <input type="text" value={rotConfig.produto} onChange={e=>setRotConfig({...rotConfig,produto:e.target.value})} placeholder="Ex: Creme Anti-rugas" style={{width:"100%",padding:"9px 12px",border:`1px solid ${t.border}`,borderRadius:9,background:t.surfaceAlt,color:t.text,fontSize:13}}/>
