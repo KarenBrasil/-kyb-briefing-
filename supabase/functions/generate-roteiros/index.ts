@@ -36,22 +36,25 @@ Formate como JSON array com 10 objetos, cada um com: {titulo, hook, corpo, cta}
 
 Seja criativo, variado, e focado em conversão. Use linguagem natural e engajadora.`
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const apiKey = Deno.env.get("GEMINI_API_KEY") || ""
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": Deno.env.get("ANTHROPIC_API_KEY") || "",
-        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 4000,
-        messages: [
+        contents: [
           {
-            role: "user",
-            content: prompt,
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
           },
         ],
+        generationConfig: {
+          maxOutputTokens: 4000,
+        },
       }),
     })
 
@@ -60,7 +63,7 @@ Seja criativo, variado, e focado em conversão. Use linguagem natural e engajado
     }
 
     const data = await response.json()
-    const content = data.content[0].text
+    const content = data.candidates[0].content.parts[0].text
 
     // Parse JSON from response
     const jsonMatch = content.match(/\[[\s\S]*\]/)
