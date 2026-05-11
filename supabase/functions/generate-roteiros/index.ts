@@ -74,18 +74,19 @@ Seja criativo, variado, e focado em conversão. Use linguagem natural e engajado
     }
     const content = data.candidates[0].content.parts[0].text
 
-    // Parse JSON from response
-    const jsonMatch = content.match(/\[[\s\S]*\]/)
-    if (!jsonMatch) {
-      console.error("Content received:", content)
-      throw new Error(`Failed to parse roteiros. Content: ${content.substring(0, 500)}`)
+    // Parse JSON from response (handle both markdown code blocks and raw JSON)
+    let jsonMatch = content.match(/```json\n([\s\S]*?)\n```/)
+    let jsonStr = jsonMatch ? jsonMatch[1] : content.match(/\[[\s\S]*\]/)?.[0]
+
+    if (!jsonStr) {
+      throw new Error(`Failed to find JSON array in response: ${content.substring(0, 300)}`)
     }
 
     let roteiros
     try {
-      roteiros = JSON.parse(jsonMatch[0])
+      roteiros = JSON.parse(jsonStr)
     } catch (parseErr) {
-      throw new Error(`JSON parse error: ${parseErr.message}. Content: ${jsonMatch[0].substring(0, 500)}`)
+      throw new Error(`JSON parse error: ${parseErr.message}`)
     }
 
     return new Response(JSON.stringify({ roteiros: roteiros.slice(0, 10) }), {
