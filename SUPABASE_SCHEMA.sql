@@ -26,6 +26,9 @@ create table if not exists client_meta (
   checklist jsonb default '{}'::jsonb,
   links jsonb default '[]'::jsonb,
   playlist text default '',
+  ideias jsonb default '[]'::jsonb,
+  referencias jsonb default '[]'::jsonb,
+  formatos jsonb default '[]'::jsonb,
   updated_at timestamptz default now()
 );
 
