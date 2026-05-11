@@ -626,6 +626,35 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
     return () => clearInterval(interval);
   }, []);
 
+  // Carregar dados globais de Organización
+  useEffect(() => {
+    async function loadOrganizacao() {
+      try {
+        const data = await getOrganizacao();
+        setIdeias(data.ideias || []);
+        setReferencias(data.referencias || []);
+        setFormatos(data.formatos || []);
+      } catch (err) {
+        console.error("Erro ao carregar organización:", err);
+      }
+    }
+    loadOrganizacao();
+  }, []);
+
+  // Auto-save de Organización quando muda
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (ideias.length > 0 || referencias.length > 0 || formatos.length > 0) {
+        try {
+          await saveOrganizacao(ideias, referencias, formatos);
+        } catch (err) {
+          console.error("Erro ao salvar organización:", err);
+        }
+      }
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [ideias, referencias, formatos]);
+
   const selectClient = async (c) => {
     setLoading(true);
     setSelected(c);
@@ -866,6 +895,10 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
 
         {tab==="organizacao" && (
           <div className="a0">
+            <div style={{background:t.surface,border:`1px solid ${t.border}`,borderRadius:16,padding:22,marginBottom:24,boxShadow:`0 2px 10px ${t.shadow}`}}>
+              <h2 className="pf" style={{fontSize:20,color:t.text,marginBottom:4}}>🏢 Organización da Agência</h2>
+              <p style={{color:t.textMuted,fontSize:12}}>Centralize ideias, referências e formatos que toda a equipe usa. Estas informações são compartilhadas globalmente, não são específicas de nenhum cliente.</p>
+            </div>
             <div style={{display:"grid",gap:24,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
               {/* IDEIAS */}
               <div style={{background:t.surface,border:`1px solid ${t.border}`,borderRadius:16,padding:20}}>

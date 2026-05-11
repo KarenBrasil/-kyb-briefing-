@@ -162,20 +162,16 @@ export async function deleteRoteiro(roteiroId) {
   if (error) throw error;
 }
 
-// Organización - Salvar dados (ideias, referências, formatos)
-export async function saveOrganizacao(clientId, ideias, referencias, formatos) {
+// Organización - Salvar dados globais (AGÊNCIA, não por cliente)
+export async function saveOrganizacao(ideias, referencias, formatos) {
   const { data, error } = await supabase
     .from("organizacao")
-    .upsert(
-      {
-        client_id: clientId,
-        ideias: ideias || [],
-        referencias: referencias || [],
-        formatos: formatos || [],
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "client_id" }
-    )
+    .update({
+      ideias: ideias || [],
+      referencias: referencias || [],
+      formatos: formatos || [],
+      updated_at: new Date().toISOString(),
+    })
     .select()
     .single();
 
@@ -183,12 +179,12 @@ export async function saveOrganizacao(clientId, ideias, referencias, formatos) {
   return data;
 }
 
-// Organización - Obter dados
-export async function getOrganizacao(clientId) {
+// Organización - Obter dados globais
+export async function getOrganizacao() {
   const { data, error } = await supabase
     .from("organizacao")
     .select("*")
-    .eq("client_id", clientId)
+    .limit(1)
     .single();
 
   if (error && error.code !== "PGRST116") throw error;
