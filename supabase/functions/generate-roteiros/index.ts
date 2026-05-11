@@ -59,10 +59,14 @@ Seja criativo, variado, e focado em conversão. Use linguagem natural e engajado
     })
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`)
+      const errorBody = await response.text()
+      throw new Error(`API error: ${response.status} - ${errorBody}`)
     }
 
     const data = await response.json()
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error(`Invalid response structure: ${JSON.stringify(data)}`)
+    }
     const content = data.candidates[0].content.parts[0].text
 
     // Parse JSON from response
