@@ -37,7 +37,7 @@ Formate como JSON array com 10 objetos, cada um com: {titulo, hook, corpo, cta}
 Seja criativo, variado, e focado em conversão. Use linguagem natural e engajadora.`
 
     const apiKey = Deno.env.get("GEMINI_API_KEY") || ""
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
