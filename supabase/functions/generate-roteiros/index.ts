@@ -77,10 +77,16 @@ Seja criativo, variado, e focado em conversão. Use linguagem natural e engajado
     // Parse JSON from response
     const jsonMatch = content.match(/\[[\s\S]*\]/)
     if (!jsonMatch) {
-      throw new Error("Failed to parse roteiros")
+      console.error("Content received:", content)
+      throw new Error(`Failed to parse roteiros. Content: ${content.substring(0, 500)}`)
     }
 
-    const roteiros = JSON.parse(jsonMatch[0])
+    let roteiros
+    try {
+      roteiros = JSON.parse(jsonMatch[0])
+    } catch (parseErr) {
+      throw new Error(`JSON parse error: ${parseErr.message}. Content: ${jsonMatch[0].substring(0, 500)}`)
+    }
 
     return new Response(JSON.stringify({ roteiros: roteiros.slice(0, 10) }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
