@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { getClient, upsertClient, listClients, saveSnapshot, listSnapshots, deleteSnapshot, getMeta, saveMeta } from "./lib/db";
+import { generateRoteiros } from "./lib/roteiros";
 
 const THEMES = {
   light: {
@@ -590,6 +591,14 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
   const [playlist,  setPlaylist] = useState("");
   const [plInput,   setPlInput]  = useState("");
   const [plEdit,    setPlEdit]   = useState(false);
+
+  // Organização
+  const [ideias,    setIdeias]   = useState([]);
+  const [referencias, setReferencias] = useState([]);
+  const [formatos,  setFormatos] = useState([]);
+  const [gerando,   setGerando]  = useState(false);
+  const [roteiros,  setRoteiros] = useState([]);
+  const [rotConfig, setRotConfig] = useState({produto: "", fisico: false, digital: false, tom: "casual", linhas: "200", formato: "Reel"});
   const [newClient, setNewClient]= useState("");
   const [saved,     setSaved]    = useState(false);
 
@@ -693,6 +702,7 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
     {id:"clientes", label:"Clientes",   icon:"client"},
     {id:"briefing", label:"Briefing",   icon:"edit"},
     {id:"checklist",label:"Onboarding", icon:"check"},
+    {id:"organizacao", label:"Organização", icon:"bolt"},
     {id:"arquivos", label:"Arquivos",   icon:"link"},
     {id:"playlist", label:"Playlist",   icon:"music"},
     {id:"historico",label:"Histórico",  icon:"history"},
@@ -853,6 +863,109 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {tab==="organizacao" && (
+          <div className="a0">
+            <div style={{display:"grid",gap:24,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
+              {/* IDEIAS */}
+              <div style={{background:t.surface,border:`1px solid ${t.border}`,borderRadius:16,padding:20}}>
+                <h3 style={{fontSize:15,fontWeight:700,color:t.text,marginBottom:16}}>💡 Ideias</h3>
+                <div style={{display:"flex",gap:8,marginBottom:12}}>
+                  <input type="text" placeholder="Nova ideia..." onKeyPress={e=>{if(e.key==="Enter"&&e.target.value){setIdeias([...ideias,{id:Date.now(),text:e.target.value}]);e.target.value="";}}} style={{flex:1,padding:"8px 12px",border:`1px solid ${t.border}`,borderRadius:8,background:t.surfaceAlt,color:t.text,fontSize:12}}/>
+                  <button onClick={()=>{const inp=document.querySelector("[placeholder='Nova ideia...']");if(inp.value){setIdeias([...ideias,{id:Date.now(),text:inp.value}]);inp.value="";}}} style={{padding:"8px 14px",background:t.rose,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600}}>+</button>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:"300px",overflowY:"auto"}}>
+                  {ideias.map(idea=><div key={idea.id} style={{background:t.surfaceAlt,padding:"10px 12px",borderRadius:8,fontSize:12,color:t.text,display:"flex",justifyContent:"space-between",alignItems:"center"}}>{idea.text}<button onClick={()=>setIdeias(ideias.filter(i=>i.id!==idea.id))} style={{background:"none",border:"none",color:t.textMuted,cursor:"pointer",fontSize:13}}>✕</button></div>)}
+                </div>
+              </div>
+
+              {/* REFERÊNCIAS */}
+              <div style={{background:t.surface,border:`1px solid ${t.border}`,borderRadius:16,padding:20}}>
+                <h3 style={{fontSize:15,fontWeight:700,color:t.text,marginBottom:16}}>📎 Referências</h3>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  <input type="text" placeholder="Título da referência..." id="refTitle" style={{padding:"8px 12px",border:`1px solid ${t.border}`,borderRadius:8,background:t.surfaceAlt,color:t.text,fontSize:12}}/>
+                  <input type="url" placeholder="Link..." id="refUrl" style={{padding:"8px 12px",border:`1px solid ${t.border}`,borderRadius:8,background:t.surfaceAlt,color:t.text,fontSize:12}}/>
+                  <button onClick={()=>{const title=document.getElementById("refTitle").value;const url=document.getElementById("refUrl").value;if(title&&url){setReferencias([...referencias,{id:Date.now(),title,url}]);document.getElementById("refTitle").value="";document.getElementById("refUrl").value="";}}} style={{padding:"8px 14px",background:t.gold,color:t.bg,border:"none",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600}}>Salvar Ref</button>
+                </div>
+                <div style={{marginTop:12,display:"flex",flexDirection:"column",gap:8,maxHeight:"300px",overflowY:"auto"}}>
+                  {referencias.map(ref=><div key={ref.id} style={{background:t.surfaceAlt,padding:"10px 12px",borderRadius:8,fontSize:11,display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{color:t.text,fontWeight:600}}>{ref.title}</div><a href={ref.url} target="_blank" rel="noreferrer" style={{color:t.rose,textDecoration:"none"}}>abrir</a></div><button onClick={()=>setReferencias(referencias.filter(r=>r.id!==ref.id))} style={{background:"none",border:"none",color:t.textMuted,cursor:"pointer"}}>✕</button></div>)}
+                </div>
+              </div>
+
+              {/* FORMATOS */}
+              <div style={{background:t.surface,border:`1px solid ${t.border}`,borderRadius:16,padding:20}}>
+                <h3 style={{fontSize:15,fontWeight:700,color:t.text,marginBottom:16}}>🎬 Formatos</h3>
+                <div style={{display:"flex",gap:8,marginBottom:12}}>
+                  <input type="text" placeholder="Ex: Reel 30s..." id="formatInput" style={{flex:1,padding:"8px 12px",border:`1px solid ${t.border}`,borderRadius:8,background:t.surfaceAlt,color:t.text,fontSize:12}}/>
+                  <button onClick={()=>{const inp=document.getElementById("formatInput");if(inp.value){setFormatos([...formatos,{id:Date.now(),nome:inp.value}]);inp.value="";}}} style={{padding:"8px 14px",background:t.green,color:t.bg,border:"none",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600}}>+</button>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                  {formatos.map(fmt=><div key={fmt.id} style={{background:t.surfaceAlt,padding:"8px 12px",borderRadius:6,fontSize:12,color:t.text,display:"flex",justifyContent:"space-between",alignItems:"center"}}>{fmt.nome}<button onClick={()=>setFormatos(formatos.filter(f=>f.id!==fmt.id))} style={{background:"none",border:"none",color:t.textMuted,cursor:"pointer"}}>✕</button></div>)}
+                </div>
+              </div>
+            </div>
+
+            {/* GERADOR DE ROTEIROS */}
+            <div style={{marginTop:24,background:t.surface,border:`2px solid ${t.rose}40`,borderRadius:16,padding:24}}>
+              <h2 className="pf" style={{fontSize:22,color:t.text,marginBottom:4}}>✨ Gerador de Roteiros</h2>
+              <p style={{color:t.textMuted,fontSize:12,marginBottom:18}}>Gere até 10 roteiros automáticos para seus vídeos</p>
+
+              <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr)),marginBottom:20}}>
+                <div>
+                  <label style={{display:"block",fontSize:11,fontWeight:600,color:t.textMid,marginBottom:6}}>Nome do Produto</label>
+                  <input type="text" value={rotConfig.produto} onChange={e=>setRotConfig({...rotConfig,produto:e.target.value})} placeholder="Ex: Creme Anti-rugas" style={{width:"100%",padding:"9px 12px",border:`1px solid ${t.border}`,borderRadius:9,background:t.surfaceAlt,color:t.text,fontSize:13}}/>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:11,fontWeight:600,color:t.textMid,marginBottom:6}}>Tipo</label>
+                  <div style={{display:"flex",gap:8}}>
+                    <label style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}><input type="checkbox" checked={rotConfig.fisico} onChange={e=>setRotConfig({...rotConfig,fisico:e.target.checked})} style={{cursor:"pointer"}}/><span style={{fontSize:12,color:t.text}}>Físico</span></label>
+                    <label style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}><input type="checkbox" checked={rotConfig.digital} onChange={e=>setRotConfig({...rotConfig,digital:e.target.checked})} style={{cursor:"pointer"}}/><span style={{fontSize:12,color:t.text}}>Digital</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:11,fontWeight:600,color:t.textMid,marginBottom:6}}>Tom</label>
+                  <select value={rotConfig.tom} onChange={e=>setRotConfig({...rotConfig,tom:e.target.value})} style={{width:"100%",padding:"9px 12px",border:`1px solid ${t.border}`,borderRadius:9,background:t.surfaceAlt,color:t.text,fontSize:13}}>
+                    <option>casual</option>
+                    <option>profissional</option>
+                    <option>inspirador</option>
+                    <option>humorístico</option>
+                    <option>técnico</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:11,fontWeight:600,color:t.textMid,marginBottom:6}}>Linhas</label>
+                  <select value={rotConfig.linhas} onChange={e=>setRotConfig({...rotConfig,linhas:e.target.value})} style={{width:"100%",padding:"9px 12px",border:`1px solid ${t.border}`,borderRadius:9,background:t.surfaceAlt,color:t.text,fontSize:13}}>
+                    <option>100</option>
+                    <option>200</option>
+                    <option>300</option>
+                    <option>400</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:11,fontWeight:600,color:t.textMid,marginBottom:6}}>Formato</label>
+                  <select value={rotConfig.formato} onChange={e=>setRotConfig({...rotConfig,formato:e.target.value})} style={{width:"100%",padding:"9px 12px",border:`1px solid ${t.border}`,borderRadius:9,background:t.surfaceAlt,color:t.text,fontSize:13}}>
+                    <option>Reel</option>
+                    <option>Story</option>
+                    <option>TikTok</option>
+                    <option>Carrossel</option>
+                    <option>Vídeo Longo</option>
+                  </select>
+                </div>
+              </div>
+
+              <button onClick={async()=>{if(!rotConfig.produto|(!rotConfig.fisico&&!rotConfig.digital)){alert("Preencha produto e selecione tipo!");return;}setGerando(true);try{const rots=await generateRoteiros(rotConfig.produto,{fisico:rotConfig.fisico,digital:rotConfig.digital},rotConfig.tom,rotConfig.linhas,rotConfig.formato);setRoteiros(rots);}catch(err){alert("Erro: "+err.message);}setGerando(false);}} disabled={gerando} style={{width:"100%",padding:"12px 20px",background:gerando?t.textMuted:t.rose,color:"#fff",border:"none",borderRadius:10,cursor:gerando?"not-allowed":"pointer",fontSize:14,fontWeight:600,marginBottom:20}}>{gerando?"Gerando...":"Gerar 10 Roteiros"}</button>
+
+              {roteiros.length>0&&<div style={{display:"grid",gap:14}}>
+                {roteiros.map((rot,i)=><div key={i} style={{background:t.surfaceAlt,border:`1px solid ${t.border}`,borderRadius:12,padding:16}}>
+                  <h4 style={{fontSize:13,fontWeight:700,color:t.rose,marginBottom:8}}>#{i+1} {rot.titulo||"Roteiro"}</h4>
+                  <div style={{marginBottom:10}}><strong style={{color:t.textMid,fontSize:11}}>Hook:</strong><p style={{color:t.text,fontSize:12,marginTop:4}}>{rot.hook}</p></div>
+                  <div style={{marginBottom:10}}><strong style={{color:t.textMid,fontSize:11}}>Corpo:</strong><p style={{color:t.text,fontSize:12,marginTop:4,whiteSpace:"pre-wrap"}}>{rot.corpo}</p></div>
+                  <div><strong style={{color:t.textMid,fontSize:11}}>CTA:</strong><p style={{color:t.text,fontSize:12,marginTop:4}}>{rot.cta}</p></div>
+                </div>)}
+              </div>}
+            </div>
           </div>
         )}
 
