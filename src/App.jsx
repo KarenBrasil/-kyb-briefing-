@@ -615,18 +615,16 @@ function AdminView({ onLogout, t, isDark, toggleDark }) {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) {
-      const interval = setInterval(async () => {
-        try {
-          const list = await listClients();
-          setClients(list || []);
-        } catch (err) {
-          console.error("Erro ao recarregar clientes:", err);
-        }
-      }, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [isAdmin]);
+    const interval = setInterval(async () => {
+      try {
+        const list = await listClients();
+        setClients(list || []);
+      } catch (err) {
+        console.error("Erro ao recarregar clientes:", err);
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const selectClient = async (c) => {
     setLoading(true);
